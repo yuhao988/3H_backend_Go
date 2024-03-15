@@ -223,7 +223,7 @@ func (cc *SpellsController) updateSpell(id int, updatedSpell *Spells) error {
 		args = append(args, updatedSpell.RangeMin)
 	}
 	if updatedSpell.RangeMax != nil {
-		query += ", rang_max = $" + strconv.Itoa(len(args)+1)
+		query += ", range_max = $" + strconv.Itoa(len(args)+1)
 		args = append(args, updatedSpell.RangeMax)
 	}
 	if updatedSpell.Description != nil {

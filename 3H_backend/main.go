@@ -53,6 +53,7 @@ func main() {
 	characterController := NewCharacterController(db)
 	skillsController := NewSkillsController(db)
 	spellsController := NewSpellsController(db)
+	combatArtController := NewCombatArtController(db)
 
 	// Define your routes
 	r.HandleFunc("/characters", characterController.GetAll).Methods("GET")
@@ -72,6 +73,12 @@ func main() {
 	r.HandleFunc("/spells", spellsController.PostOne).Methods("POST")
 	r.HandleFunc("/spells/{spellID}", spellsController.PutOne).Methods("PUT")
 	r.HandleFunc("/spells/{spellID}", spellsController.DeleteOne).Methods("DELETE")
+
+	r.HandleFunc("/combat_arts", combatArtController.GetAll).Methods("GET")
+	r.HandleFunc("/combat_arts/{artID}", combatArtController.GetOne).Methods("GET")
+	r.HandleFunc("/combat_arts", combatArtController.PostOne).Methods("POST")
+	r.HandleFunc("/combat_arts/{artID}", combatArtController.PutOne).Methods("PUT")
+	r.HandleFunc("/combat_arts/{artID}", combatArtController.DeleteOne).Methods("DELETE")
 
 	port := os.Getenv("PORT")
 	if port == "" {

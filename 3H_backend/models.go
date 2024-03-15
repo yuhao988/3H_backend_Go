@@ -59,7 +59,21 @@ type Skills struct {
 }
 
 // Secondary
-type CombatArt struct{}
+type CombatArts struct {
+	ID             int
+	Name           string
+	TypeID         uint // This is the foreign key referencing Skills.ID
+	StrMag         *bool
+	Might          *int
+	Hit            *int
+	Critical       *int
+	DurabilityCost int
+	RangeMin       int
+	RangeMax       *int
+	Description    *string
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
 
 type Weapon struct{}
 
