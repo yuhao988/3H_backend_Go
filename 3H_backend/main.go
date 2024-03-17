@@ -9,21 +9,24 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/rs/cors"
-
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-)
-
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "postgres"
-	password = "921022"
-	dbname   = "fe3h"
+	"github.com/rs/cors"
 )
 
 func main() {
-	connectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	// Retrieve environment variables
+	host := os.Getenv("HOST")
+	sql_port := os.Getenv("SQL_PORT")
+	user := os.Getenv("USER")
+	password := os.Getenv("PASSWORD")
+	dbname := os.Getenv("DBNAME")
+
+	connectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, sql_port, user, password, dbname)
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		log.Fatal(err)
@@ -58,6 +61,7 @@ func main() {
 	// Define your routes
 	r.HandleFunc("/characters", characterController.GetAll).Methods("GET")
 	r.HandleFunc("/characters/{charID}", characterController.GetOne).Methods("GET")
+	r.HandleFunc("/characters/house/{affinity}", characterController.GetByAffinity).Methods("GET")
 	r.HandleFunc("/characters", characterController.PostOne).Methods("POST")
 	r.HandleFunc("/characters/{charID}", characterController.PutOne).Methods("PUT")
 	r.HandleFunc("/characters/{charID}", characterController.DeleteOne).Methods("DELETE")
@@ -80,7 +84,7 @@ func main() {
 	r.HandleFunc("/combat_arts/{artID}", combatArtController.PutOne).Methods("PUT")
 	r.HandleFunc("/combat_arts/{artID}", combatArtController.DeleteOne).Methods("DELETE")
 
-	port := os.Getenv("PORT")
+	port := os.Getenv("BACKEND_PORT")
 	if port == "" {
 		port = "2999"
 	}

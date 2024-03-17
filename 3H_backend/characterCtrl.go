@@ -112,6 +112,59 @@ func (cc *CharacterController) getCharacterByID(id int) (*Character, error) {
 	return &character, nil
 }
 
+func (cc *CharacterController) GetByAffinity(w http.ResponseWriter, r *http.Request) {
+	affinity := mux.Vars(r)["affinity"]
+	// aff, err := strconv.Atoi(affinity)
+	// if err != nil {
+	// 	http.Error(w, "Invalid character affinity", http.StatusBadRequest)
+	// 	return
+	// }
+
+	character, err := cc.getCharacterByAffinity(affinity)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error getting character: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	if character == nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	responseJSON, err := json.Marshal(character)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error encoding character to JSON: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
+}
+
+func (cc *CharacterController) getCharacterByAffinity(affinity string) ([]Character, error) {
+	// Implement the logic to fetch a character by ID from the database
+	// Example:
+	rows, err := cc.db.Query("SELECT * FROM characters WHERE affinity = $1", affinity)
+	if err != nil {
+		log.Printf("Error querying all characters: %s", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var characters []Character
+
+	for rows.Next() {
+		var character Character
+		err := rows.Scan(&character.ID, &character.Name, &character.ImageLink, &character.Affinity, &character.BaseLv, &character.HP, &character.HpGrowth, &character.Strength, &character.StrGrowth, &character.Magic, &character.MagGrowth, &character.Dexterity, &character.DexGrowth, &character.Speed, &character.SpdGrowth, &character.Luck, &character.LckGrowth, &character.Defence, &character.DefGrowth, &character.Resistance, &character.ResGrowth, &character.Charm, &character.ChaGrowth, &character.CreatedAt, &character.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		characters = append(characters, character)
+	}
+
+	return characters, nil
+}
+
 func (cc *CharacterController) PostOne(w http.ResponseWriter, r *http.Request) {
 	var character Character
 	err := json.NewDecoder(r.Body).Decode(&character)

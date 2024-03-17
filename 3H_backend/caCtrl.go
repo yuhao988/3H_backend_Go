@@ -59,7 +59,7 @@ func (cc *CombatArtController) getAllCombatArts() ([]CombatArts, error) {
 		var combatArt CombatArts
 		err := rows.Scan(&combatArt.ID, &combatArt.Name, &combatArt.TypeID, &combatArt.StrMag,
 			&combatArt.Might, &combatArt.Hit, &combatArt.Critical, &combatArt.DurabilityCost,
-			&combatArt.RangeMin, &combatArt.RangeMax, &combatArt.CreatedAt, &combatArt.UpdatedAt)
+			&combatArt.RangeMin, &combatArt.RangeMax, &combatArt.Description, &combatArt.CreatedAt, &combatArt.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -104,7 +104,7 @@ func (cc *CombatArtController) getCombatArtByID(id int) (*CombatArts, error) {
 	row := cc.db.QueryRow("SELECT * FROM combat_arts WHERE id = $1", id)
 
 	var combatArt CombatArts
-	err := row.Scan(&combatArt.ID, &combatArt.Name, &combatArt.TypeID, &combatArt.Might, &combatArt.Hit,
+	err := row.Scan(&combatArt.ID, &combatArt.Name, &combatArt.TypeID, &combatArt.StrMag, &combatArt.Might, &combatArt.Hit,
 		&combatArt.Critical, &combatArt.DurabilityCost, &combatArt.RangeMin, &combatArt.RangeMax,
 		&combatArt.Description, &combatArt.CreatedAt, &combatArt.UpdatedAt)
 	if err == sql.ErrNoRows {
@@ -289,7 +289,7 @@ func (cc *CombatArtController) deleteComabtArt(id int) error {
 	}
 
 	if !exists {
-		return fmt.Errorf("Combat art with ID %d not found", id)
+		return fmt.Errorf("combat art with ID %d not found", id)
 	}
 
 	// Combat art exists, proceed with deletion
