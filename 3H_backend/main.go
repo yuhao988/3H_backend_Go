@@ -57,6 +57,7 @@ func main() {
 	skillsController := NewSkillsController(db)
 	spellsController := NewSpellsController(db)
 	combatArtController := NewCombatArtController(db)
+	weaponsController := NewWeaponsController(db)
 
 	// Define your routes
 	r.HandleFunc("/characters", characterController.GetAll).Methods("GET")
@@ -83,6 +84,13 @@ func main() {
 	r.HandleFunc("/combat_arts", combatArtController.PostOne).Methods("POST")
 	r.HandleFunc("/combat_arts/{artID}", combatArtController.PutOne).Methods("PUT")
 	r.HandleFunc("/combat_arts/{artID}", combatArtController.DeleteOne).Methods("DELETE")
+
+	r.HandleFunc("/weapons", weaponsController.GetAll).Methods("GET")
+	r.HandleFunc("/weapons/{weaponID}", weaponsController.GetOne).Methods("GET")
+	r.HandleFunc("/weapons/name/{weaponName}", weaponsController.GetOneName).Methods("GET")
+	r.HandleFunc("/weapons", weaponsController.PostOne).Methods("POST")
+	r.HandleFunc("/weapons/{weaponID}", weaponsController.PutOne).Methods("PUT")
+	r.HandleFunc("/weapons/{weaponID}", weaponsController.DeleteOne).Methods("DELETE")
 
 	port := os.Getenv("BACKEND_PORT")
 	if port == "" {
