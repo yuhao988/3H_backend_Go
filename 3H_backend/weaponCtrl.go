@@ -55,7 +55,11 @@ func (cc *WeaponsController) getAllWeapons() ([]Weapons, error) {
 	for rows.Next() {
 		var weapon Weapons
 
-		err := rows.Scan(&weapon.ID, &weapon.Name, &weapon.TypeID, &weapon.StrMag, &weapon.Might, &weapon.Hit, &weapon.Critical, &weapon.Durability, &weapon.Weight, &weapon.RangeMin, &weapon.RangeMax, &weapon.Description, &weapon.CreatedAt, &weapon.UpdatedAt)
+		err := rows.Scan(&weapon.ID, &weapon.Name, &weapon.TypeID,
+			&weapon.StrMag, &weapon.Might, &weapon.Hit, &weapon.Critical,
+			&weapon.Durability, &weapon.Weight, &weapon.RangeMin,
+			&weapon.RangeMax, &weapon.Description, &weapon.CreatedAt,
+			&weapon.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}
@@ -134,20 +138,33 @@ func (cc *WeaponsController) GetOneName(w http.ResponseWriter, r *http.Request) 
 	w.Write(responseJSON)
 }
 
-func (cc *WeaponsController) getWeaponByName(name string) (*Weapons, error) {
+func (cc *WeaponsController) getWeaponByName(name string) ([]Weapons, error) {
 	// Implement the logic to fetch a weapon by ID from the database
 	// Example:
-	row := cc.db.QueryRow("SELECT * FROM weapons WHERE name LIKE $1", name+"%")
-
-	var weapon Weapons
-	err := row.Scan(&weapon.ID, &weapon.Name, &weapon.TypeID, &weapon.StrMag, &weapon.Might, &weapon.Hit, &weapon.Critical, &weapon.Durability, &weapon.Weight, &weapon.RangeMin, &weapon.RangeMax, &weapon.Description, &weapon.CreatedAt, &weapon.UpdatedAt)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
+	rows, err := cc.db.Query("SELECT * FROM weapons WHERE name LIKE $1", name+"%")
+	if err != nil {
+		log.Printf("Error querying all weapons: %s", err)
 		return nil, err
 	}
+	defer rows.Close()
 
-	return &weapon, nil
+	var weapons []Weapons
+
+	for rows.Next() {
+		var weapon Weapons
+
+		err := rows.Scan(&weapon.ID, &weapon.Name, &weapon.TypeID,
+			&weapon.StrMag, &weapon.Might, &weapon.Hit, &weapon.Critical,
+			&weapon.Durability, &weapon.Weight, &weapon.RangeMin,
+			&weapon.RangeMax, &weapon.Description, &weapon.CreatedAt,
+			&weapon.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		weapons = append(weapons, weapon)
+	}
+
+	return weapons, nil
 }
 
 func (cc *WeaponsController) PostOne(w http.ResponseWriter, r *http.Request) {
