@@ -58,11 +58,13 @@ func main() {
 	spellsController := NewSpellsController(db)
 	combatArtController := NewCombatArtController(db)
 	weaponsController := NewWeaponsController(db)
+	charSkillsController := NewCharSkillsController(db)
 
 	// Define your routes
 	r.HandleFunc("/characters", characterController.GetAll).Methods("GET")
 	r.HandleFunc("/characters/{charID}", characterController.GetOne).Methods("GET")
 	r.HandleFunc("/characters/house/{affinity}", characterController.GetByAffinity).Methods("GET")
+	r.HandleFunc("/characters/name/{charName}", characterController.GetByName).Methods("GET")
 	r.HandleFunc("/characters", characterController.PostOne).Methods("POST")
 	r.HandleFunc("/characters/{charID}", characterController.PutOne).Methods("PUT")
 	r.HandleFunc("/characters/{charID}", characterController.DeleteOne).Methods("DELETE")
@@ -91,6 +93,13 @@ func main() {
 	r.HandleFunc("/weapons", weaponsController.PostOne).Methods("POST")
 	r.HandleFunc("/weapons/{weaponID}", weaponsController.PutOne).Methods("PUT")
 	r.HandleFunc("/weapons/{weaponID}", weaponsController.DeleteOne).Methods("DELETE")
+
+	r.HandleFunc("/charskilllist", charSkillsController.GetAll).Methods("GET")
+	r.HandleFunc("/charskilllist/{listID}", charSkillsController.GetOneByID).Methods("GET")
+	r.HandleFunc("/charskilllist/char/{charID}", charSkillsController.GetOneByCharID).Methods("GET")
+	r.HandleFunc("/charskilllist", charSkillsController.PostOne).Methods("POST")
+	r.HandleFunc("/charskilllist/{listID}", charSkillsController.PutOne).Methods("PUT")
+	r.HandleFunc("/charskilllist/{listID}", charSkillsController.DeleteOne).Methods("DELETE")
 
 	port := os.Getenv("BACKEND_PORT")
 	if port == "" {

@@ -164,6 +164,46 @@ func (cc *CharacterController) getCharacterByAffinity(affinity string) ([]Charac
 
 	return characters, nil
 }
+func (cc *CharacterController) GetByName(w http.ResponseWriter, r *http.Request) {
+	charName := mux.Vars(r)["charName"]
+
+	character, err := cc.getCharacterByName(charName)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error getting character: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	if character == nil {
+		http.Error(w, "Character not found", http.StatusNotFound)
+		return
+	}
+
+	responseJSON, err := json.Marshal(character)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error encoding character to JSON: %s", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(responseJSON)
+}
+
+func (cc *CharacterController) getCharacterByName(name string) (*Character, error) {
+	name = strings.Title(name)
+	// Implement the logic to fetch a character by ID from the database
+	// Example:
+	row := cc.db.QueryRow("SELECT * FROM characters WHERE name = $1", name)
+
+	var character Character
+	err := row.Scan(&character.ID, &character.Name, &character.ImageLink, &character.Affinity, &character.BaseLv, &character.HP, &character.HpGrowth, &character.Strength, &character.StrGrowth, &character.Magic, &character.MagGrowth, &character.Dexterity, &character.DexGrowth, &character.Speed, &character.SpdGrowth, &character.Luck, &character.LckGrowth, &character.Defence, &character.DefGrowth, &character.Resistance, &character.ResGrowth, &character.Charm, &character.ChaGrowth, &character.CreatedAt, &character.UpdatedAt)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &character, nil
+}
 
 func (cc *CharacterController) PostOne(w http.ResponseWriter, r *http.Request) {
 	var character Character
@@ -195,10 +235,19 @@ func (cc *CharacterController) PostOne(w http.ResponseWriter, r *http.Request) {
 func (cc *CharacterController) insertCharacter(character *Character) error {
 	// Perform the insert operation with the RETURNING clause to get the ID
 	err := cc.db.QueryRow(`
-		INSERT INTO characters (name, image_link, affinity, base_lv, hp, hp_growth, strength, str_growth, magic, mag_growth, dexterity, dex_growth, speed, spd_growth, luck, lck_growth, defence, def_growth, resistance, res_growth, charm, cha_growth, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+		INSERT INTO characters (name, image_link, affinity, base_lv, hp, hp_growth,
+			 strength, str_growth, magic, mag_growth, dexterity, dex_growth, speed, 
+			 spd_growth, luck, lck_growth, defence, def_growth, resistance, res_growth, 
+			 charm, cha_growth, created_at, updated_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, 
+			$17, $18, $19, $20, $21, $22, $23, $24)
 		RETURNING id
-	`, character.Name, character.ImageLink, character.Affinity, character.BaseLv, character.HP, character.HpGrowth, character.Strength, character.StrGrowth, character.Magic, character.MagGrowth, character.Dexterity, character.DexGrowth, character.Speed, character.SpdGrowth, character.Luck, character.LckGrowth, character.Defence, character.DefGrowth, character.Resistance, character.ResGrowth, character.Charm, character.ChaGrowth, character.CreatedAt, character.UpdatedAt).Scan(&character.ID)
+	`, character.Name, character.ImageLink, character.Affinity, character.BaseLv,
+		character.HP, character.HpGrowth, character.Strength, character.StrGrowth,
+		character.Magic, character.MagGrowth, character.Dexterity, character.DexGrowth,
+		character.Speed, character.SpdGrowth, character.Luck, character.LckGrowth,
+		character.Defence, character.DefGrowth, character.Resistance, character.ResGrowth,
+		character.Charm, character.ChaGrowth, character.CreatedAt, character.UpdatedAt).Scan(&character.ID)
 
 	if err != nil {
 		return err
@@ -360,7 +409,7 @@ func (cc *CharacterController) DeleteOne(w http.ResponseWriter, r *http.Request)
 	charID := mux.Vars(r)["charID"]
 	id, err := strconv.Atoi(charID)
 	if err != nil {
-		http.Error(w, "Invalid character ID", http.StatusBadRequest)
+		http.Error(w, "invalid character ID", http.StatusBadRequest)
 		return
 	}
 

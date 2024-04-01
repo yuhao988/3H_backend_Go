@@ -93,4 +93,15 @@ type Weapons struct {
 }
 
 // Tertiary
-type CharSkill struct{}
+type CharSkill struct {
+	ID        int
+	Name      string
+	CharID    int
+	SpellList []int
+	CAList    []int
+	Boons     []int
+	Banes     []int
+	Budding   *int
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
