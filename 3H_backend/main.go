@@ -14,6 +14,37 @@ import (
 	"github.com/rs/cors"
 )
 
+func createTable(db *sql.DB) {
+	_, err := db.Exec(`
+        CREATE TABLE IF NOT EXISTS classes (
+            id SERIAL PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            rank VARCHAR(255) NOT NULL,
+			base INTEGER[] NOT NULL,			
+			bonus INTEGER[],
+			growth INTEGER[],
+			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    `)
+	if err != nil {
+		log.Fatal("Error creating table:", err)
+	}
+
+	// Check if the table was actually created
+	var exists bool
+	err = db.QueryRow("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = $1)", "classes").Scan(&exists)
+	if err != nil {
+		log.Fatal("Error checking if table exists:", err)
+	}
+
+	if exists {
+		fmt.Println("Table created successfully")
+	} else {
+		fmt.Println("Table already exists")
+	}
+}
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -40,6 +71,8 @@ func main() {
 
 	fmt.Println("Successfully connected to the database")
 
+	createTable(db)
+
 	// Set up the Gorilla mux router
 	r := mux.NewRouter()
 
@@ -59,6 +92,7 @@ func main() {
 	combatArtController := NewCombatArtController(db)
 	weaponsController := NewWeaponsController(db)
 	charSkillsController := NewCharSkillsController(db)
+	classController := NewClassController(db)
 
 	// Define your routes
 	r.HandleFunc("/characters", characterController.GetAll).Methods("GET")
@@ -100,6 +134,12 @@ func main() {
 	r.HandleFunc("/charskilllist", charSkillsController.PostOne).Methods("POST")
 	r.HandleFunc("/charskilllist/{listID}", charSkillsController.PutOne).Methods("PUT")
 	r.HandleFunc("/charskilllist/{listID}", charSkillsController.DeleteOne).Methods("DELETE")
+
+	r.HandleFunc("/classes", classController.GetAll).Methods("GET")
+	r.HandleFunc("/classes/{classID}", classController.GetOne).Methods("GET")
+	r.HandleFunc("/classes", classController.PostOne).Methods("POST")
+	r.HandleFunc("/classes/{classID}", classController.PutOne).Methods("PUT")
+	r.HandleFunc("/classes/{classID}", classController.DeleteOne).Methods("DELETE")
 
 	port := os.Getenv("BACKEND_PORT")
 	if port == "" {

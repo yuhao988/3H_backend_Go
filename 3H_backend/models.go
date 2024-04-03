@@ -105,3 +105,14 @@ type CharSkill struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type Classes struct {
+	ID        int
+	Name      string
+	Rank      string
+	Base      []int
+	Bonus     []int
+	Growth    []int
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
